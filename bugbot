@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  bugbot run
+
+Runs quick bug-finding checks:
+  - ruff (lint/static checks)
+  - pytest (unit tests)
+EOF
+}
+
+cmd="${1:-}"
+
+if [[ "$cmd" != "run" ]]; then
+  usage
+  exit 2
+fi
+
+python3 -m ruff check .
+python3 -m pytest -q
+
+echo "bugbot: OK"
