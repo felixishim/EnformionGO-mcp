@@ -3,6 +3,8 @@ import logging
 from enum import Enum
 import httpx
 from fastapi import Body, Depends, FastAPI, Header, HTTPException
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi_mcp import FastApiMCP
 
@@ -147,6 +149,14 @@ app = FastAPI(
     description="A wrapper for the EnformionGO API Endpoints. With a Twist, MCP-enabled using FastMCP.",
     version="1.7.0",
 )
+
+# --- Static UI ---
+# Served at /ui (no build step). Visit /ui/ for the search console.
+app.mount("/ui", StaticFiles(directory="static", html=True), name="ui")
+
+@app.get("/", include_in_schema=False)
+async def root_redirect():
+    return RedirectResponse(url="/ui/")
 
 mcp = FastApiMCP(
     app,
