@@ -62,6 +62,19 @@
 
               <div class="space-y-5 p-5">
                 <div>
+                  <label class="text-xs font-medium text-slate-300">API base URL</label>
+                  <input
+                    id="apiBaseUrl"
+                    type="text"
+                    placeholder="http://127.0.0.1:8000"
+                    class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                  />
+                  <p class="mt-2 text-xs text-slate-400">
+                    Default is this page’s origin. If you opened this file directly (file://) or you’re hosting the UI separately, set this to your API server.
+                  </p>
+                </div>
+
+                <div>
                   <label class="text-xs font-medium text-slate-300">Endpoint</label>
                   <select
                     id="endpointSelect"

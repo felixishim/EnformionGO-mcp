@@ -187,6 +187,8 @@ const ENDPOINTS = [
 
 const el = (id) => document.getElementById(id);
 
+const STORAGE_KEY = "enformiongo_ui_settings_v1";
+
 function setStatus(text, type = "info") {
   const node = el("status");
   node.textContent = text;
@@ -295,6 +297,43 @@ function endpointById(id) {
   return ENDPOINTS.find((e) => e.id === id) ?? ENDPOINTS[0];
 }
 
+function normalizeBaseUrl(s) {
+  const v = (s || "").trim();
+  if (!v) return "";
+  return v.endsWith("/") ? v.slice(0, -1) : v;
+}
+
+function getApiBaseUrl() {
+  // Default: same-origin when served by FastAPI.
+  const input = el("apiBaseUrl");
+  const v = normalizeBaseUrl(input?.value || "");
+  if (v) return v;
+  if (location.protocol === "file:") return ""; // will error; we show a warning elsewhere
+  return location.origin;
+}
+
+function saveUiSettings() {
+  const data = {
+    apiBaseUrl: el("apiBaseUrl")?.value || "",
+    rememberCreds: !!el("rememberCreds")?.checked,
+    apName: el("apName")?.value || "",
+    apPassword: el("apPassword")?.value || "",
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadUiSettings() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  const parsed = safeJsonParse(raw);
+  if (!parsed.ok) return;
+
+  if (el("apiBaseUrl")) el("apiBaseUrl").value = parsed.value.apiBaseUrl ?? "";
+  if (el("rememberCreds")) el("rememberCreds").checked = !!parsed.value.rememberCreds;
+  if (el("apName")) el("apName").value = parsed.value.apName ?? "";
+  if (el("apPassword")) el("apPassword").value = parsed.value.apPassword ?? "";
+}
+
 function setMode(mode) {
   const isForm = mode === "form";
   el("formContainer").classList.toggle("hidden", !isForm);
@@ -354,7 +393,8 @@ function setEndpoint(endpoint) {
 }
 
 function buildCurl(endpoint, body, headers) {
-  const parts = ["curl", "-sS", "-X", endpoint.method, JSON.stringify(location.origin + endpoint.path)];
+  const base = getApiBaseUrl() || location.origin;
+  const parts = ["curl", "-sS", "-X", endpoint.method, JSON.stringify(base + endpoint.path)];
   for (const [k, v] of Object.entries(headers)) {
     if (!v) continue;
     parts.push("-H", JSON.stringify(`${k}: ${v}`));
@@ -368,6 +408,7 @@ async function send(endpoint) {
   setStatus("Sending…");
 
   const headers = headersFromUI(endpoint);
+  const base = getApiBaseUrl();
 
   let body;
   if (!el("jsonContainer").classList.contains("hidden")) {
@@ -383,13 +424,19 @@ async function send(endpoint) {
   }
 
   // sync remembered creds
-  syncCredStorage();
+  saveUiSettings();
 
   try {
-    const res = await fetch(endpoint.path, {
+    if (!base && location.protocol === "file:") {
+      throw new Error("UI opened via file://. Please open /ui/ from the running FastAPI server, or set API base URL.");
+    }
+
+    const url = (base || location.origin) + endpoint.path;
+    const res = await fetch(url, {
       method: endpoint.method,
       headers,
       body: JSON.stringify(body),
+      credentials: "same-origin",
     });
 
     const text = await res.text();
@@ -418,30 +465,12 @@ async function send(endpoint) {
 }
 
 function syncCredStorage() {
-  const remember = el("rememberCreds").checked;
-  const key = "enformiongo_ui_creds_v1";
-
-  if (!remember) {
-    localStorage.removeItem(key);
-    return;
-  }
-
-  const data = {
-    apName: el("apName").value,
-    apPassword: el("apPassword").value,
-  };
-  localStorage.setItem(key, JSON.stringify(data));
+  // Backwards compatibility for earlier versions; now we store a single settings object.
+  saveUiSettings();
 }
 
 function loadCredStorage() {
-  const key = "enformiongo_ui_creds_v1";
-  const raw = localStorage.getItem(key);
-  if (!raw) return;
-  const parsed = safeJsonParse(raw);
-  if (!parsed.ok) return;
-  el("rememberCreds").checked = true;
-  el("apName").value = parsed.value.apName ?? "";
-  el("apPassword").value = parsed.value.apPassword ?? "";
+  loadUiSettings();
 }
 
 function copyToClipboard(text) {
@@ -459,6 +488,15 @@ function init() {
   }
 
   loadCredStorage();
+
+  // Default the base URL input when served via HTTP(S)
+  if (el("apiBaseUrl") && !el("apiBaseUrl").value && location.protocol !== "file:") {
+    el("apiBaseUrl").value = location.origin;
+  }
+
+  if (location.protocol === "file:") {
+    setStatus("You opened the UI via file:// — set API base URL or open /ui/ from the server.", "error");
+  }
 
   // default endpoint
   setEndpoint(ENDPOINTS[0]);
@@ -517,6 +555,7 @@ function init() {
   el("rememberCreds").addEventListener("change", syncCredStorage);
   el("apName").addEventListener("input", () => el("rememberCreds").checked && syncCredStorage());
   el("apPassword").addEventListener("input", () => el("rememberCreds").checked && syncCredStorage());
+  el("apiBaseUrl").addEventListener("input", () => saveUiSettings());
 
   el("togglePassword").addEventListener("click", () => {
     const i = el("apPassword");
