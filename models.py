@@ -68,13 +68,29 @@ class ContactEnrichmentRequest(BaseModel):
 
 class ReversePhoneSearchRequest(BaseModel):
     """Defines the request body for the Reverse Phone Search API."""
-    phone: str = Field(..., alias="Phone", description="The phone number to search for (e.g., '123-456-7890').")
+    phone_number: str = Field(
+        ...,
+        alias="PhoneNumber",
+        description="The phone number to search for (e.g., '(123) 456-7890').",
+    )
     page: Optional[int] = Field(1, alias="Page", description="The page of data to return.")
-    results_per_page: Optional[int] = Field(10, alias="ResultsPerPage", description="The number of results to return per page.")
+    results_per_page: Optional[int] = Field(
+        10, alias="ResultsPerPage", description="The number of results to return per page."
+    )
 
     class Config:
         """Pydantic config to allow population by alias."""
         populate_by_name = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_legacy_phone_field(cls, data):
+        """
+        Accept legacy payloads that use 'Phone' instead of 'PhoneNumber'.
+        """
+        if isinstance(data, dict) and "Phone" in data and "PhoneNumber" not in data:
+            data = {**data, "PhoneNumber": data["Phone"]}
+        return data
 
 class CallerIdRequest(BaseModel):
     """Defines the request body for the Caller ID API."""

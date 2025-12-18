@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnformionGO — Search Console</title>
+
+    <!-- Tailwind via CDN for a fast, modern UI. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              glow: "0 0 0 1px rgba(148,163,184,.25), 0 0 40px rgba(56,189,248,.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="h-full text-slate-100">
+    <div class="min-h-full">
+      <header class="sticky top-0 z-20 border-b border-white/10 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-400/20 to-fuchsia-400/20 ring-1 ring-white/10"></div>
+            <div>
+              <div class="text-sm font-semibold tracking-tight">EnformionGO</div>
+              <div class="text-xs text-slate-400">Search console (wrapper UI)</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a
+              class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+              href="/docs"
+              target="_blank"
+              rel="noreferrer"
+              >Open API Docs</a
+            >
+            <a
+              class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+              href="/mcp"
+              target="_blank"
+              rel="noreferrer"
+              >MCP</a
+            >
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <!-- Left: Endpoint + Credentials -->
+          <section class="lg:col-span-4">
+            <div class="rounded-2xl border border-white/10 bg-slate-900/30 shadow-glow">
+              <div class="border-b border-white/10 px-5 py-4">
+                <div class="text-sm font-semibold">Request</div>
+                <div class="mt-1 text-xs text-slate-400">Select an endpoint and provide headers.</div>
+              </div>
+
+              <div class="space-y-5 p-5">
+                <div>
+                  <label class="text-xs font-medium text-slate-300">Endpoint</label>
+                  <select
+                    id="endpointSelect"
+                    class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-100 outline-none ring-cyan-400/20 focus:ring-4"
+                  ></select>
+                  <p id="endpointHelp" class="mt-2 text-xs text-slate-400"></p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                  <div>
+                    <label class="text-xs font-medium text-slate-300">galaxy-ap-name</label>
+                    <input
+                      id="apName"
+                      type="text"
+                      placeholder="Access Profile Name"
+                      class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs font-medium text-slate-300">galaxy-ap-password</label>
+                    <input
+                      id="apPassword"
+                      type="password"
+                      placeholder="Access Profile Password"
+                      class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                    />
+                    <div class="mt-2 flex items-center justify-between">
+                      <label class="flex items-center gap-2 text-xs text-slate-400">
+                        <input id="rememberCreds" type="checkbox" class="h-4 w-4 rounded border-white/10 bg-slate-950/40" />
+                        Remember in browser
+                      </label>
+                      <button
+                        id="togglePassword"
+                        type="button"
+                        class="rounded-lg px-2 py-1 text-xs text-slate-300 ring-1 ring-white/10 hover:bg-white/5"
+                      >
+                        Show
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="text-xs font-medium text-slate-300">galaxy-search-type (optional)</label>
+                    <input
+                      id="searchType"
+                      type="text"
+                      placeholder="Override default"
+                      class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs font-medium text-slate-300">galaxy-client-session-id (optional)</label>
+                    <input
+                      id="clientSessionId"
+                      type="text"
+                      placeholder="Session ID"
+                      class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs font-medium text-slate-300">galaxy-client-type (optional)</label>
+                  <input
+                    id="clientType"
+                    type="text"
+                    placeholder="Required for some JS clients"
+                    class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-3">
+                  <button
+                    id="sendBtn"
+                    class="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    type="button"
+                  >
+                    Send request
+                  </button>
+
+                  <button
+                    id="copyCurlBtn"
+                    class="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+                    type="button"
+                  >
+                    Copy cURL
+                  </button>
+
+                  <div id="status" class="text-xs text-slate-400"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Right: Form + Response -->
+          <section class="lg:col-span-8">
+            <div class="rounded-2xl border border-white/10 bg-slate-900/30 shadow-glow">
+              <div class="flex flex-col gap-3 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div class="text-sm font-semibold">Body</div>
+                  <div class="mt-1 text-xs text-slate-400">Fill the form or paste JSON.</div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button
+                    id="modeForm"
+                    class="rounded-lg px-3 py-2 text-xs font-medium ring-1 ring-white/10 hover:bg-white/5"
+                    type="button"
+                  >
+                    Form
+                  </button>
+                  <button
+                    id="modeJson"
+                    class="rounded-lg px-3 py-2 text-xs font-medium ring-1 ring-white/10 hover:bg-white/5"
+                    type="button"
+                  >
+                    JSON
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
+                <div>
+                  <div id="formContainer" class="space-y-4"></div>
+                  <div id="jsonContainer" class="hidden">
+                    <textarea
+                      id="jsonBody"
+                      class="h-96 w-full rounded-xl border border-white/10 bg-slate-950/40 p-3 text-xs leading-relaxed text-slate-100 outline-none ring-cyan-400/20 focus:ring-4"
+                      spellcheck="false"
+                    ></textarea>
+                    <div class="mt-2 flex items-center justify-between">
+                      <button
+                        id="formatJsonBtn"
+                        type="button"
+                        class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+                      >
+                        Format JSON
+                      </button>
+                      <button
+                        id="resetBtn"
+                        type="button"
+                        class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm font-semibold">Response</div>
+                    <button
+                      id="copyResponseBtn"
+                      type="button"
+                      class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre
+                    id="responseBox"
+                    class="mt-3 h-[28rem] overflow-auto rounded-xl border border-white/10 bg-slate-950/40 p-3 text-xs leading-relaxed text-slate-100"
+                  >Select an endpoint and send a request.</pre>
+                </div>
+              </div>
+            </div>
+
+            <p class="mt-4 text-xs text-slate-500">
+              Tip: You can provide creds via headers here, or set them via <code class="rounded bg-white/5 px-1 py-0.5">.env</code>.
+              This UI calls your local wrapper endpoints (same origin).
+            </p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
