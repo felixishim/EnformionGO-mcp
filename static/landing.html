@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnformionGO — Web App</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              glow: "0 0 0 1px rgba(148,163,184,.25), 0 0 40px rgba(56,189,248,.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="h-full text-slate-100">
+    <div class="min-h-full">
+      <header class="border-b border-white/10 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-400/20 to-fuchsia-400/20 ring-1 ring-white/10"></div>
+            <div>
+              <div class="text-sm font-semibold tracking-tight">EnformionGO</div>
+              <div class="text-xs text-slate-400">Web app powered by your FastAPI wrapper</div>
+            </div>
+          </div>
+
+          <nav class="flex items-center gap-2">
+            <a class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5" href="/ui/">Open Search Console</a>
+            <a class="rounded-lg px-3 py-2 text-xs font-medium text-slate-200 ring-1 ring-white/10 hover:bg-white/5" href="/docs" target="_blank" rel="noreferrer">API Docs</a>
+          </nav>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <section class="rounded-2xl border border-white/10 bg-slate-900/30 p-6 shadow-glow">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div class="lg:col-span-7">
+              <h1 class="text-2xl font-semibold tracking-tight">Search & Enrichment, in one place</h1>
+              <p class="mt-2 text-sm text-slate-300">
+                This webpage talks to your running API wrapper to show service health and available endpoints.
+                For full searches with credentials and request bodies, use the Search Console.
+              </p>
+
+              <div class="mt-5 flex flex-wrap items-center gap-3">
+                <a class="rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-cyan-400" href="/ui/">Launch Search Console</a>
+                <button id="refreshBtn" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/5" type="button">Refresh Status</button>
+              </div>
+
+              <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div class="text-xs font-medium text-slate-400">Service Health</div>
+                  <div id="healthValue" class="mt-2 text-base font-semibold">Checking…</div>
+                  <div id="healthMeta" class="mt-1 text-xs text-slate-500"></div>
+                </div>
+
+                <div class="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div class="text-xs font-medium text-slate-400">Available Endpoints</div>
+                  <div id="endpointCount" class="mt-2 text-base font-semibold">Loading…</div>
+                  <div class="mt-1 text-xs text-slate-500">Pulled from <code class="rounded bg-white/5 px-1 py-0.5">/openapi.json</code></div>
+                </div>
+              </div>
+
+              <p id="statusLine" class="mt-4 text-xs text-slate-500"></p>
+            </div>
+
+            <div class="lg:col-span-5">
+              <div class="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                <div class="flex items-center justify-between">
+                  <div class="text-sm font-semibold">Endpoint Explorer</div>
+                  <a class="text-xs text-slate-300 underline decoration-white/20 hover:text-white" href="/ui/">Open full console →</a>
+                </div>
+                <p class="mt-1 text-xs text-slate-400">Select an endpoint to see its method/path summary from OpenAPI.</p>
+
+                <select id="endpointSelect" class="mt-3 w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm outline-none ring-cyan-400/20 focus:ring-4"></select>
+
+                <pre id="endpointDetails" class="mt-3 h-56 overflow-auto rounded-xl border border-white/10 bg-slate-950/40 p-3 text-xs leading-relaxed text-slate-100">Loading…</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-5">
+            <div class="text-sm font-semibold">Modern UI</div>
+            <p class="mt-2 text-sm text-slate-300">Use <code class="rounded bg-white/5 px-1 py-0.5">/ui/</code> for a user-friendly search experience with forms, JSON mode, and a response viewer.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-5">
+            <div class="text-sm font-semibold">Bring-your-own key</div>
+            <p class="mt-2 text-sm text-slate-300">Provide <code class="rounded bg-white/5 px-1 py-0.5">galaxy-ap-name</code> and <code class="rounded bg-white/5 px-1 py-0.5">galaxy-ap-password</code> in the UI or via <code class="rounded bg-white/5 px-1 py-0.5">.env</code>.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-slate-900/30 p-5">
+            <div class="text-sm font-semibold">API + MCP</div>
+            <p class="mt-2 text-sm text-slate-300">Use the REST endpoints from <code class="rounded bg-white/5 px-1 py-0.5">/docs</code> or the MCP server at <code class="rounded bg-white/5 px-1 py-0.5">/mcp</code>.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="border-t border-white/10">
+        <div class="mx-auto max-w-7xl px-4 py-8 text-xs text-slate-500 sm:px-6 lg:px-8">
+          Powered by your FastAPI EnformionGO wrapper.
+        </div>
+      </footer>
+    </div>
+
+    <script src="./landing.js"></script>
+  </body>
+</html>
